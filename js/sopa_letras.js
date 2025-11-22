@@ -6,7 +6,6 @@ const contenedorPalabras = document.getElementById("contenedor-palabras");
 const contenedorPalabraSeleccionada = document.getElementById("palabra-seleccionada");
 const progresoBar = document.getElementById("progreso");
 
-// Crear modal de victoria
 const modalVictoria = document.createElement('div');
 modalVictoria.className = 'modal-victoria';
 
@@ -241,11 +240,11 @@ function verificarPalabra(palabra) {
         
         let ancho, alto;
         if (seleccion.length === 1) {
-            ancho = cellW * 0.9;
+            ancho = cellW * 0.4;
         } else {
-            ancho = distancia + cellW * 1.05;
+            ancho = distancia + cellW * 0.9;
         }
-        alto = cellH * 0.9;
+        alto = cellH * 0.7;
         
         const resaltado = document.createElement('div');
         resaltado.className = 'resaltado';
@@ -280,15 +279,17 @@ function continuarSeleccion(celdaActual) {
     let pasoY = 0;
 
     if (dx === 0 && dy === 0) {
-    } else if (Math.abs(dx) > Math.abs(dy) * 2) {
+        // Misma celda
+    } else if (Math.abs(dx) > Math.abs(dy) * 1.5) {
+        // Horizontal
         pasoX = Math.sign(dx);
-    } else if (Math.abs(dy) > Math.abs(dx) * 2) {
+    } else if (Math.abs(dy) > Math.abs(dx) * 1.5) {
+        // Vertical
         pasoY = Math.sign(dy);
     } else {
-        if (Math.abs(Math.abs(dx) - Math.abs(dy)) < 3) {
-             pasoX = Math.sign(dx);
-             pasoY = Math.sign(dy);
-        }
+        // Diagonal - más sensible
+        pasoX = Math.sign(dx);
+        pasoY = Math.sign(dy);
     }
 
     seleccion.forEach(l => l.classList.remove("seleccionada"));

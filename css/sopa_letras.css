@@ -74,7 +74,7 @@ main {
 /* Tablero */
 .sopa-letras {
     display: grid;
-    gap: 10px;
+    gap: 0;
     grid-template-columns: repeat(12, 45px);
     grid-template-rows: repeat(12, 45px);
     justify-content: center;
@@ -88,23 +88,28 @@ main {
 /* Celdas */
 .celda-sopa-letras {
     align-items: center;
-    border: 1px solid transparent;
+    border: 1px solid #e0e0e0;
     cursor: pointer;
     display: flex;
     font-size: 1.1rem;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
     user-select: none;
+    background-color: white;
 }
 
 .celda-sopa-letras:hover {
+    background-color: #f0f8ff;
     transform: scale(1.05);
 }
 
 .celda-sopa-letras.seleccionada {
     background-color: var(--color-resaltado);
     color: var(--color-principal);
-    font-weight: 600;
+    font-weight: 700;
+    transform: scale(1.08);
+    border-color: #7ac5e0;
+    z-index: 2;
 }
 
 /* Modal Victoria */
