@@ -240,46 +240,39 @@ function verificarPalabra(palabra) {
     }
 }
 
-contenedorTablero.addEventListener('mousedown', e => {
-    if (!e.target.classList.contains('celda-sopa-letras')) {
-        return;
-    }
+function iniciarSeleccion(celda) {
     limpiarSeleccion();
     seleccionActiva = true;
-    marcarLetra(e.target);
-});
+    marcarLetra(celda);
+}
 
-contenedorTablero.addEventListener('mousemove', e => {
-    if (!seleccionActiva) {
-        return;
-    }
-    if (!e.target.classList.contains('celda-sopa-letras')) {
-        return;
-    }
-    if (seleccion.includes(e.target)) {
-        if (seleccion.length >= 2 && e.target === seleccion[seleccion.length - 2]) {
+function continuarSeleccion(celda) {
+    if (!seleccionActiva) return;
+    if (!celda || !celda.classList.contains('celda-sopa-letras')) return;
+
+    if (seleccion.includes(celda)) {
+        if (seleccion.length >= 2 && celda === seleccion[seleccion.length - 2]) {
             desmarcarUltima();
         }
         return;
     }
+
     const ultima = seleccion[seleccion.length - 1];
     const posUltima = obtenerPosicion(ultima);
-    const posNueva = obtenerPosicion(e.target);
-    if (!esAdyacente(posUltima, posNueva)) {
-        return;
-    }
+    const posNueva = obtenerPosicion(celda);
+
+    if (!esAdyacente(posUltima, posNueva)) return;
+
     if (seleccion.length === 1) {
         direccionSeleccion = normalizarVector(posNueva.x - posUltima.x, posNueva.y - posUltima.y);
-        marcarLetra(e.target);
+        marcarLetra(celda);
     } else if (mismaDireccion(posUltima, posNueva, direccionSeleccion)) {
-        marcarLetra(e.target);
+        marcarLetra(celda);
     }
-});
+}
 
-document.addEventListener('mouseup', () => {
-    if (!seleccionActiva) {
-        return;
-    }
+function finalizarSeleccion() {
+    if (!seleccionActiva) return;
     seleccionActiva = false;
     const palabra = seleccion.map(l => l.textContent).join('');
     if (palabra) {
@@ -287,6 +280,40 @@ document.addEventListener('mouseup', () => {
         verificarPalabra(palabra);
     }
     limpiarSeleccion();
+}
+
+contenedorTablero.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('celda-sopa-letras')) {
+        iniciarSeleccion(e.target);
+    }
 });
+
+contenedorTablero.addEventListener('mousemove', e => {
+    continuarSeleccion(e.target);
+});
+
+document.addEventListener('mouseup', finalizarSeleccion);
+
+contenedorTablero.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const elemento = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (elemento && elemento.classList.contains('celda-sopa-letras')) {
+            iniciarSeleccion(elemento);
+        }
+    }
+}, { passive: false });
+
+contenedorTablero.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const elemento = document.elementFromPoint(touch.clientX, touch.clientY);
+        continuarSeleccion(elemento);
+    }
+}, { passive: false });
+
+document.addEventListener('touchend', finalizarSeleccion);
 
 inicializarJuego();

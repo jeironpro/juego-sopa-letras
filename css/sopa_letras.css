@@ -81,6 +81,7 @@ main {
     position: relative;
     width: max-content;
     z-index: 1;
+    touch-action: none;
 }
 
 /* Celdas */
