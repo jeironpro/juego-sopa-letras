@@ -1,0 +1,232 @@
+/* Variables de colores y fuentes */
+:root {
+    --color-fondo-resaltado: rgba(255, 0, 0, 0.3);
+    --color-linea: #00b400;
+    --color-principal: #004466;
+    --color-progreso: #4caf50;
+    --color-resaltado: #a0d8ef;
+    --fuente-principal: 'Mozilla Text', sans-serif;
+}
+
+/* Reset y base */
+* {
+    box-sizing: border-box;
+    font-family: var(--fuente-principal);
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: var(--color-principal);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header, footer {
+    background-color: #e0f0f7;
+    padding: 1rem;
+    text-align: center;
+}
+
+main {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+/* Contenedor principal */
+.contenedor-principal {
+    align-items: start;
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 2fr 1fr;
+    max-width: 1200px;
+    width: 100%;
+}
+
+/* Contenedor sopa de letras */
+.contenedor-sopa-letras {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Palabra seleccionada */
+.palabra-seleccionada {
+    font-size: 1.25rem;
+    font-weight: bold;
+    left: 50%;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    transition: opacity 0.2s ease;
+}
+
+/* Tablero */
+.sopa-letras {
+    display: grid;
+    gap: 0;
+    grid-template-columns: repeat(12, 45px);
+    grid-template-rows: repeat(12, 45px);
+    justify-content: center;
+    margin-top: 3rem;
+    position: relative;
+    width: max-content;
+}
+
+/* Celdas */
+.celda-sopa-letras {
+    align-items: center;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: flex;
+    font-size: 1.1rem;
+    justify-content: center;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.celda-sopa-letras:hover {
+    transform: scale(1.05);
+}
+
+.celda-sopa-letras.seleccionada {
+    background-color: var(--color-resaltado);
+    color: var(--color-principal);
+    font-weight: 600;
+}
+
+/* Resaltado de palabra */
+.resaltado {
+    background-color: var(--color-fondo-resaltado);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.2);
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transform-origin: center;
+    z-index: 1;
+}
+
+.resaltado.show {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Contenedor palabras a encontrar */
+.contenedor-palabras-encontrar {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 3rem;
+    width: 100%;
+}
+
+.contenedor-palabras-encontrar h3 {
+    text-align: center;
+}
+
+/* Barra progreso */
+.barra-progreso {
+    background-color: #ddd;
+    border-radius: 4px;
+    height: 8px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    width: 100%;
+}
+
+.barra-progreso .progreso {
+    background-color: var(--color-progreso);
+    height: 100%;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.contenedor-palabras {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Palabra encontrada */
+.linea-verde {
+    text-decoration: line-through;
+    text-decoration-color: var(--color-linea);
+    text-decoration-thickness: 2px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .contenedor-principal {
+        gap: 1.5rem;
+        grid-template-columns: 1fr;
+    }
+    
+    .contenedor-palabras-encontrar {
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .sopa-letras {
+        grid-template-columns: repeat(12, 35px);
+        grid-template-rows: repeat(12, 35px);
+        margin-top: 2rem;
+    }
+    
+    .celda-sopa-letras {
+        font-size: 0.95rem;
+    }
+    
+    .palabra-seleccionada {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    main {
+        padding: 1rem 0.5rem;
+    }
+    
+    .sopa-letras {
+        grid-template-columns: repeat(12, 28px);
+        grid-template-rows: repeat(12, 28px);
+        margin-top: 1.5rem;
+    }
+    
+    .celda-sopa-letras {
+        font-size: 0.85rem;
+    }
+    
+    .palabra-seleccionada {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .sopa-letras {
+        grid-template-columns: repeat(12, 24px);
+        grid-template-rows: repeat(12, 24px);
+    }
+    
+    .celda-sopa-letras {
+        font-size: 0.75rem;
+    }
+    
+    .palabra-seleccionada {
+        font-size: 0.9rem;
+    }
+}
