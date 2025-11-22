@@ -67,13 +67,14 @@ main {
     position: absolute;
     top: 0;
     transform: translateX(-50%);
-    transition: opacity 0.2s ease;
+    transition: all 0.2s ease;
+    user-select: none;
 }
 
 /* Tablero */
 .sopa-letras {
     display: grid;
-    gap: 0;
+    gap: 10px;
     grid-template-columns: repeat(12, 45px);
     grid-template-rows: repeat(12, 45px);
     justify-content: center;
@@ -106,6 +107,76 @@ main {
     font-weight: 600;
 }
 
+/* Modal Victoria */
+.modal-victoria {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-victoria.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.contenido-modal {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    max-width: 90%;
+    width: 400px;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-victoria.visible .contenido-modal {
+    transform: scale(1);
+}
+
+.contenido-modal h2 {
+    color: var(--color-principal);
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.contenido-modal p {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: #666;
+}
+
+.btn-reiniciar {
+    background-color: var(--color-principal);
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-reiniciar:hover {
+    background-color: #005580;
+    transform: scale(1.05);
+}
+
+.btn-reiniciar:active {
+    transform: scale(0.95);
+}
+
 /* Resaltado de palabra */
 .resaltado {
     background-color: var(--color-fondo-resaltado);
@@ -118,7 +189,7 @@ main {
     z-index: 1;
 }
 
-.resaltado.show {
+.resaltado.mostrar {
     animation: fadeIn 0.3s ease forwards;
 }
 

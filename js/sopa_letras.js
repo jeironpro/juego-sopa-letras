@@ -1,9 +1,34 @@
 let palabras = [];
+let todasLasPalabras = [];
 const tamano = 12;
 const contenedorTablero = document.getElementById("tablero");
 const contenedorPalabras = document.getElementById("contenedor-palabras");
 const contenedorPalabraSeleccionada = document.getElementById("palabra-seleccionada");
 const progresoBar = document.getElementById("progreso");
+
+// Crear modal de victoria
+const modalVictoria = document.createElement('div');
+modalVictoria.className = 'modal-victoria';
+
+const contenidoModal = document.createElement('div');
+contenidoModal.className = 'contenido-modal';
+
+const titulo = document.createElement('h2');
+titulo.textContent = '¡Felicidades!';
+
+const mensaje = document.createElement('p');
+mensaje.textContent = 'Has encontrado todas las palabras.';
+
+const btnReiniciar = document.createElement('button');
+btnReiniciar.className = 'btn-reiniciar';
+btnReiniciar.textContent = 'Jugar de nuevo';
+btnReiniciar.addEventListener('click', reiniciarJuego);
+
+contenidoModal.appendChild(titulo);
+contenidoModal.appendChild(mensaje);
+contenidoModal.appendChild(btnReiniciar);
+modalVictoria.appendChild(contenidoModal);
+document.body.appendChild(modalVictoria);
 
 function seleccionarPalabrasAleatorias(array, cantidad) {
     const shuffled = [...array].sort(() => 0.5 - Math.random());
@@ -20,12 +45,33 @@ function inicializarJuego() {
             return respuesta.json();
         })
         .then(data => {
-            palabras = seleccionarPalabrasAleatorias(data.palabras, 10);
-            inicializarTablero();
+            todasLasPalabras = data.palabras;
+            iniciarPartida();
         })
         .catch(error => {
             console.log(`Error al intentar cargar el JSON: ${error}`);
         });
+}
+
+function iniciarPartida() {
+    palabras = seleccionarPalabrasAleatorias(todasLasPalabras, 10);
+    inicializarTablero();
+}
+
+function reiniciarJuego() {
+    while (contenedorTablero.firstChild) {
+        contenedorTablero.removeChild(contenedorTablero.firstChild);
+    }
+    while (contenedorPalabras.firstChild) {
+        contenedorPalabras.removeChild(contenedorPalabras.firstChild);
+    }
+    modalVictoria.classList.remove('visible');
+    if (progresoBar) progresoBar.style.width = '0%';
+    iniciarPartida();
+}
+
+function mostrarVictoria() {
+    modalVictoria.classList.add('visible');
 }
 
 function colocarPalabra(palabra) {
@@ -109,57 +155,27 @@ function inicializarTablero() {
 
 let seleccion = [];
 let seleccionActiva = false;
-let direccionSeleccion = null;
+let celdaInicio = null;
 
 function obtenerPosicion(letra) {
     return { x: parseInt(letra.dataset.x, 10), y: parseInt(letra.dataset.y, 10) };
 }
 
-function normalizarVector(dx, dy) {
-    return { dx: dx === 0 ? 0 : dx / Math.abs(dx), dy: dy === 0 ? 0 : dy / Math.abs(dy) };
-}
-
-function esAdyacente(p1, p2) {
-    const dx = Math.abs(p2.x - p1.x);
-    const dy = Math.abs(p2.y - p1.y);
-    return (dx <= 1 && dy <= 1) && !(dx === 0 && dy === 0);
-}
-
-function mismaDireccion(p1, p2, dir) {
-    const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
-    const norm = normalizarVector(dx, dy);
-    return norm.dx === dir.dx && norm.dy === dir.dy;
+function obtenerCeldaEnPosicion(x, y) {
+    return document.querySelector(`.celda-sopa-letras[data-x="${x}"][data-y="${y}"]`);
 }
 
 function marcarLetra(letra) {
-    letra.classList.add("seleccionada");
-    seleccion.push(letra);
-    seleccion.forEach(l => l.classList.remove('primera', 'ultima'));
-    if (seleccion.length > 0) {
-        seleccion[0].classList.add('primera');
-        seleccion[seleccion.length - 1].classList.add('ultima');
+    if (!letra.classList.contains("seleccionada")) {
+        letra.classList.add("seleccionada");
+        seleccion.push(letra);
     }
-    actualizarPalabraSeleccionada();
-}
-
-function desmarcarUltima() {
-    const ultima = seleccion.pop();
-    if (ultima) {
-        ultima.classList.remove("seleccionada", "primera", "ultima");
-    }
-    seleccion.forEach(l => l.classList.remove('primera', 'ultima'));
-    if (seleccion.length > 0) {
-        seleccion[0].classList.add('primera');
-        seleccion[seleccion.length - 1].classList.add('ultima');
-    }
-    actualizarPalabraSeleccionada();
 }
 
 function limpiarSeleccion() {
-    seleccion.forEach(l => l.classList.remove("seleccionada", "primera", "ultima"));
+    seleccion.forEach(l => l.classList.remove("seleccionada"));
     seleccion = [];
-    direccionSeleccion = null;
+    celdaInicio = null;
     seleccionActiva = false;
     actualizarPalabraSeleccionada();
 }
@@ -180,6 +196,10 @@ function actualizarProgreso() {
     const encontradas = document.querySelectorAll('.contenedor-palabras li.found').length;
     if (progresoBar) {
         progresoBar.style.width = `${(encontradas / total) * 100}%`;
+    }
+    
+    if (encontradas === total) {
+        mostrarVictoria();
     }
 }
 
@@ -222,11 +242,10 @@ function verificarPalabra(palabra) {
         let ancho, alto;
         if (seleccion.length === 1) {
             ancho = cellW * 0.9;
-            alto = cellH * 0.9;
         } else {
-            ancho = distancia + cellW * 1.15;
-            alto = cellH * 0.9;
+            ancho = distancia + cellW * 1.05;
         }
+        alto = cellH * 0.9;
         
         const resaltado = document.createElement('div');
         resaltado.className = 'resaltado';
@@ -235,7 +254,7 @@ function verificarPalabra(palabra) {
         resaltado.style.left = `${mx}px`;
         resaltado.style.top = `${my}px`;
         resaltado.style.transform = `translate(-50%, -50%) rotate(${angulo}deg)`;
-        resaltado.classList.add('show');
+        resaltado.classList.add('mostrar');
         contenedorTablero.appendChild(resaltado);
     }
 }
@@ -243,37 +262,56 @@ function verificarPalabra(palabra) {
 function iniciarSeleccion(celda) {
     limpiarSeleccion();
     seleccionActiva = true;
+    celdaInicio = celda;
     marcarLetra(celda);
+    actualizarPalabraSeleccionada();
 }
 
-function continuarSeleccion(celda) {
-    if (!seleccionActiva) return;
-    if (!celda || !celda.classList.contains('celda-sopa-letras')) return;
+function continuarSeleccion(celdaActual) {
+    if (!seleccionActiva || !celdaInicio || !celdaActual) return;
+    
+    const posInicio = obtenerPosicion(celdaInicio);
+    const posActual = obtenerPosicion(celdaActual);
 
-    if (seleccion.includes(celda)) {
-        if (seleccion.length >= 2 && celda === seleccion[seleccion.length - 2]) {
-            desmarcarUltima();
+    const dx = posActual.x - posInicio.x;
+    const dy = posActual.y - posInicio.y;
+
+    let pasoX = 0;
+    let pasoY = 0;
+
+    if (dx === 0 && dy === 0) {
+    } else if (Math.abs(dx) > Math.abs(dy) * 2) {
+        pasoX = Math.sign(dx);
+    } else if (Math.abs(dy) > Math.abs(dx) * 2) {
+        pasoY = Math.sign(dy);
+    } else {
+        if (Math.abs(Math.abs(dx) - Math.abs(dy)) < 3) {
+             pasoX = Math.sign(dx);
+             pasoY = Math.sign(dy);
         }
-        return;
     }
 
-    const ultima = seleccion[seleccion.length - 1];
-    const posUltima = obtenerPosicion(ultima);
-    const posNueva = obtenerPosicion(celda);
+    seleccion.forEach(l => l.classList.remove("seleccionada"));
+    seleccion = [];
 
-    if (!esAdyacente(posUltima, posNueva)) return;
-
-    if (seleccion.length === 1) {
-        direccionSeleccion = normalizarVector(posNueva.x - posUltima.x, posNueva.y - posUltima.y);
-        marcarLetra(celda);
-    } else if (mismaDireccion(posUltima, posNueva, direccionSeleccion)) {
-        marcarLetra(celda);
+    if (pasoX === 0 && pasoY === 0 && (dx !== 0 || dy !== 0)) {
+         marcarLetra(celdaInicio);
+    } else {
+        const longitud = Math.max(Math.abs(dx), Math.abs(dy));
+        for (let i = 0; i <= longitud; i++) {
+            const x = posInicio.x + (pasoX * i);
+            const y = posInicio.y + (pasoY * i);
+            const celda = obtenerCeldaEnPosicion(x, y);
+            if (celda) marcarLetra(celda);
+        }
     }
+    actualizarPalabraSeleccionada();
 }
 
 function finalizarSeleccion() {
     if (!seleccionActiva) return;
     seleccionActiva = false;
+
     const palabra = seleccion.map(l => l.textContent).join('');
     if (palabra) {
         console.log('Palabra seleccionada:', palabra);
